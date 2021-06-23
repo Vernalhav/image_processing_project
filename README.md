@@ -50,7 +50,7 @@ Para esta etapa, foram testados diversos modelos de detecção. Todos estes mode
 # Primeiros modelos
 Nestes modelos, as células vivas e mortas eram identificadas por meio de operações nos canais de cor da imagem seguidas de detecção de componentes conectadas para a identificação de cada célula como pode ser visualizado na imagem a seguir.
 
-<img src="https://cdn.discordapp.com/attachments/691454909551214624/857353960951644230/blue_cells_class.png">
+<img src="https://media.discordapp.net/attachments/691454909551214624/857355744215433266/first_method.png?width=710&height=701">
 
 
 # Identificação das leveduras
