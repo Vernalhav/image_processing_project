@@ -33,7 +33,7 @@ Descobrimos um programa standalone feito em Java chamado ImageJ que possui um pl
 
 Estudamos o [paper do algoritmo implementado](https://academic.oup.com/bioinformatics/article/25/11/1463/332497?login=true) por esse programa, (e o [código correspondente](https://github.com/fiji/Stitching)), mas tivemos dificuldades ao tentar implementar a primeira etapa de phase correlation em Python (mesmo usando o OpenCV). Uma solução temporária não-ideal é utilizar o wrapper [PyImageJ](https://github.com/imagej/pyimagej), já que não roda corretamente no Google Colab e necessita da JVM.  
 
-Como o stitching 2 a 2 do OpenCV estava funcionando bem, tentamos extrair os parâmetros da transformação linear 
+Como o stitching 2 a 2 do OpenCV estava funcionando bem, tentamos extrair os parâmetros da transformação que foi calculada durante o pipeline, mas também tivemos dificuldades ao implementá-lo. Utilizamos o feature detector ORB para extrair os keypoints das duas imagens adjacentes mascarando a região de interesse, depois utilizamos um knnMatcher para associar os keypoints entre as duas imagens.
 
 
 # Identificação das leveduras
