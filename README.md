@@ -44,6 +44,14 @@ Com isso, obtivemos um resultado satisfatório:
 
 <img src="https://media.discordapp.net/attachments/691454909551214624/857340404545749033/unknown.png?width=740&height=670">
 
+# Identificação e classificação de células de levedura
+Para esta etapa, foram testados diversos modelos de detecção. Todos estes modelos buscavam evidenciar as céluas na imagem por meio da sua filtragem, canais de cores, thresholding, detecção de bordas etc. Os primeiros modelos, descartados ainda no início do projeto, exerciam as funções de identificar as células e classificá-las ao mesmo tempo por meio da segmentação da imagem por cores. Os modelos seguintes focaram na separação entre as etapas de detecção e classificação por meio da identificação de todas as células de forma indiscriminada seguida da classificação das mesmas por meio de um modelo <em>K-nearest-neighbors</em> treinado em um dos <em>datasets</em> disponibilizados. 
+
+# Primeiros modelos
+Nestes modelos, as células vivas e mortas eram identificadas por meio de operações nos canais de cor da imagem seguidas de detecção de componentes conectadas para a identificação de cada célula como pode ser visualizado na imagem a seguir.
+
+<img src="https://cdn.discordapp.com/attachments/691454909551214624/857353960951644230/blue_cells_class.png">
+
 
 # Identificação das leveduras
 
