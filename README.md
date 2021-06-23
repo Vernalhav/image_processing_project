@@ -33,10 +33,20 @@ Descobrimos um programa standalone feito em Java chamado ImageJ que possui um pl
 
 Estudamos o [paper do algoritmo implementado](https://academic.oup.com/bioinformatics/article/25/11/1463/332497?login=true) por esse programa, (e o [código correspondente](https://github.com/fiji/Stitching)), mas tivemos dificuldades ao tentar implementar a primeira etapa de phase correlation em Python (mesmo usando o OpenCV). Uma solução temporária não-ideal é utilizar o wrapper [PyImageJ](https://github.com/imagej/pyimagej), já que não roda corretamente no Google Colab e necessita da JVM.  
 
-Como o stitching 2 a 2 do OpenCV estava funcionando bem, tentamos extrair os parâmetros da transformação que foi calculada durante o pipeline, mas também tivemos dificuldades ao implementá-lo. Utilizamos o feature detector ORB para extrair os keypoints das duas imagens adjacentes mascarando a região de interesse, depois utilizamos um knnMatcher para associar os keypoints entre as duas imagens.
+Como o stitching 2 a 2 do OpenCV estava funcionando bem, tentamos extrair os parâmetros da transformação que foi calculada durante o pipeline, mas também tivemos dificuldades ao implementá-lo. Utilizamos o feature detector ORB para extrair os keypoints das duas imagens adjacentes mascarando a região de interesse, depois utilizamos um knnMatcher para associar os keypoints entre as duas imagens. Associando-as, estimávamos a transfomração entre elas com 4 graus de liberdade (translação, rotação e escala). Os resultados não foram bons quando a diferença entre luminosidade era grande entre as imagens.
+
+Por fim, tentamos identificar as extremidades do grid de cada foto (o que tem as intersecções de 3 linhas e 3 colunas). Fizemos isso através de um threshholding binário para explicitar as linhas do grid, aplicamos a operação morfológica de dilatação para unir as 3 linhas delimitadoras do grid e depois aplicamos a operação de open para removeras linhas internas do grid. Por fim, usamos a função `skeletonize` da biblioteca imutils, aplicamos um floodfill no quadrado central e usamos a função `findContours` do OpenCV para encontrar as extremidades do quadrado.
+
+<img src="https://media.discordapp.net/attachments/691454909551214624/857343024299769866/pipeline.png?width=1440&height=640">
+
+Por fim, associamos os pontos encontrados em cada imagem com as imagens adjacentes (por exemplo, associando o ponto superior direito da imagem da esquerda com o ponto superior esquerdo da imagem da direita) através de uma transformação euclidiana (que só utiliza rotação e translação). Para descobrir as transformações finais de cada imagem, compusemos as transformações locais anteriores.
+Com isso, obtivemos um resultado satisfatório:
+
+<img src="https://media.discordapp.net/attachments/691454909551214624/857340404545749033/unknown.png?width=740&height=670">
 
 
 # Identificação das leveduras
+
 
 # Classificação das leveduras
 
