@@ -8,6 +8,11 @@ Victor Giovannoni Vernalha
 O objetivo desse projeto é unir as fotos tiradas de uma câmara de Neubauer contendo leveduras vivas e mortas e realizar a contagem de células em ambas as categorias.
 A especificação completa do desafio está disponível [aqui](https://www.notion.so/Proposta-de-Projeto-336e8afb603447109116a61d147c0e09).
 
+# Arquivos  
+`stitcher.ipynb`: Responsável por receber as 5x5 imagens e criar a imagem unificada do grid.  
+`dataset_creator.ipynb`: Responsável por extrair as features das imagens do dataset de classificação e criar o dataset.
+`detect_and_classify.ipynb`: Responsável por receber a imagem do grid, detectar, classificar e contar as células mortas e vivas.  
+
 # Imagens
 As imagens serão tiradas do dataset providenciado pela Visio e são no formato RGB com resolução 4k.
 Elas estão organizadas em grupos de 25, correspondendo ao grid 5x5 dentro da câmara. As regiões comuns podem ter diferentes iluminações e rotações entre as imagens. 
