@@ -22,37 +22,71 @@ Abaixo estão alguns exemplos de fotos:
 
 <img src="https://www.notion.so/image/https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2F65e22a49-952c-4632-a2a2-bb1d47c36759%2F7Quad2.jpg?table=block&id=ca3ba6dc-c752-4b76-bafd-c61f8f7488ff&spaceId=c532495c-9c00-42ca-93eb-f43de25bdc5b&width=3070&userId=66ae02a8-0b98-4351-8841-80dc04e275f9&cache=v2" width=505>
 
-# Reconstrução do grid 
-<details>
+# Metodologia e resultados
+## Reconstrução do grid
+Para reconstruir a imagem completa tirada pela câmera, é necessário identificar as regiões que se sobrepõem nas imagens de entrada (que estão dispostas logicamente em um grid 5x5)
+e aplicar transformações geométricas para que sejam posicionadas corretamente na imagem resultante.
+
+### Identificação do grid
+Para atingir esse objetivo, tentamos identificar as extremidades do grid de cada foto (as 4 intersecções de 3 linhas e 3 colunas). Fizemos isso através de um threshholding binário para explicitar as linhas do grid; aplicamos a operação morfológica de dilatação para unir as 3 linhas delimitadoras do grid e depois aplicamos a operação de open para remover as linhas internas do grid. Por fim, usamos a função `skeletonize` da biblioteca imutils para centralizar as linhas externas do grid, aplicamos um floodfill no quadrado central e depois usamos a função `findContours` do OpenCV para encontrar as extremidades do quadrado. Ordenamos as coordenadas das 4 extremidades de forma horária, começando pelo canto superior esquerdo.  
+O processo completo está ilustrado abaixo:
+
+<img src="https://media.discordapp.net/attachments/691454909551214624/857343024299769866/pipeline.png?width=1440&height=640">
+
+### Calculando a transformação entre as imagens
+Agora com as coordenadas dos quadrados de cada imagem, associamos os pontos encontrados em cada imagem com as imagens adjacentes, estimando a transformação euclidiana de 3 graus de liberdade (rotação e translação) através da função `estimateTransform('euclidean')` da biblioteca `skelarn`. Para cada imagem, computamos a transformação relativa entre ela e as imagens adjacentes à esquerda (left) e acima (up), armazenando cada uma em sua própria matriz.
+
+Para calcular a transformação global de cada imagem na figura resultante, aplicamos o seguinte algoritmo:
+```python
+img[0, 0].global_t = identity;
+for i in [1..n]:
+    imgs[i, 0].global_t = imgs[i - 1, 0].global_t * imgs[i, 0].up
+
+for j in [1..m]:
+    imgs[0, j].global_t = imgs[0, j - 1].global_t * imgs[0, j].left
+  
+for i in [1..n]:
+    for j in [1..m]:
+        global_up = imgs[i - 1, j].global_t * imgs[i, j].up
+        global_left = imgs[i, j - 1].global_t * imgs[i, j].left
+        imgs[i, j].global_t = t * global_up + (1 - t) * global_left
+```
+Ou seja, computamos a transformação global à esquerda e acima, e decidimos a transformação global à partir de uma combinação dessas duas. Nossos experimentos indicam que o valor `t = 0.5` é o ideal para essa aplicação.
+
+### Sobreposição das imagens
+Calculadas as transformações globais, criamos uma imagem vazia de tamanho `5n x 5m` e usamos a função `warpAffine` do OpenCV com a transformação global de cada imagem.
+Embora seja possível perceber algumas descontinuidades nos quadrados mais distantes do grid, estamos satisfeitos com o resultado:
+<img src="https://media.discordapp.net/attachments/439158826483056660/863551234127822868/unknown.png?width=740&height=670">
+<img src="https://media.discordapp.net/attachments/439158826483056660/863550605091930112/unknown.png?width=740&height=670">
+
+
+## Identificação das células
+
+## Classificação e contagem das células
+
+# Outras tentativas ao longo do desenvolvimento
+
+## Reconstrução do grid 
+<!-- <details>
   <summary>Representação ilustrativa da sanidade do time durante o processo</summary>
   <img src="https://i.imgur.com/dD3MM1b.gif?noredirect">
-</details>
+</details> -->
 
-Para reconstruir a imagem completa tirada pela câmera, é necessário identificar as regiões que se sobrepõem nas imagens de entrada (que estão dispostas logicamente em um grid 5x5)
-e aplicar transformações geométricas que sejam posicionadas corretamente.  
 Nossa primeira tentativa foi usar template matching para identificar as intersecções entre as linhas delimitadoras do grid. Devido à rotação, ruído e possibilidade de oclusão dessa região, não obtivemos bons resultados.  
-Depois disso, tentamos utilizar a classe Stitcher do OpenCV, que tenta buscar as regiões em comum entre as imagens e grudá-las corretamente. Como nossas imagens estão em um formato de grid (e não em uma linha da direita para a esquerda, como é comum em imagens panorâmicas), o Stitcher "out-of-the-box" não obteve um resultado satisfatório, mas percebemos que quando utilizávamos apenas duas imagens adjacentes horizontalmente, o resultado era bom.  
+Depois disso, tentamos utilizar a classe Stitcher do OpenCV, que tenta buscar as regiões em comum entre as imagens e grudá-las corretamente. Como nossas imagens estão em um formato de grid (e não em uma linha da direita para a esquerda, como é comum em imagens panorâmicas), o Stitcher "out-of-the-box" não obteve um resultado satisfatório; além disso, o algoritmo .  
 Descobrimos um programa standalone feito em Java chamado ImageJ que possui um plugin de stitching específico para imagens em grid, e esse funcionou perfeitamente: 
 
 <img src="https://media.discordapp.net/attachments/691454909551214624/856630392588075008/unknown.png?width=691&height=670" width=600>
 
-Estudamos o [paper do algoritmo implementado](https://academic.oup.com/bioinformatics/article/25/11/1463/332497?login=true) por esse programa, (e o [código correspondente](https://github.com/fiji/Stitching)), mas tivemos dificuldades ao tentar implementar a primeira etapa de phase correlation em Python (mesmo usando o OpenCV). Uma solução temporária não-ideal é utilizar o wrapper [PyImageJ](https://github.com/imagej/pyimagej), já que não roda corretamente no Google Colab e necessita da JVM.  
+Estudamos o [paper do algoritmo implementado](https://academic.oup.com/bioinformatics/article/25/11/1463/332497?login=true) por esse programa, (e o [código correspondente](https://github.com/fiji/Stitching)), mas tivemos dificuldades ao tentar a etapa de phase correlation em Python (mesmo usando o OpenCV). Caso o nosso resultado não seja bom o suficiente para a empresa, uma possível solução não-ideal é utilizar o wrapper [PyImageJ](https://github.com/imagej/pyimagej) e gerar a foto final chamando a função do plugin.
 
-Como o stitching 2 a 2 do OpenCV estava funcionando bem, tentamos extrair os parâmetros da transformação que foi calculada durante o pipeline, mas também tivemos dificuldades ao implementá-lo. Utilizamos o feature detector ORB para extrair os keypoints das duas imagens adjacentes mascarando a região de interesse, depois utilizamos um knnMatcher para associar os keypoints entre as duas imagens. Associando-as, estimávamos a transfomração entre elas com 4 graus de liberdade (translação, rotação e escala). Os resultados não foram bons quando a diferença entre luminosidade era grande entre as imagens.
+Como o stitching 2 a 2 do OpenCV estava funcionando bem, tentamos extrair os parâmetros da transformação relativa estimada pelo OpenCV para cada par de imagens, mas essa funcionalidade só está presente na biblioteca em C++ ([Stitcher.cameras](https://docs.opencv.org/4.5.2/d2/d8d/classcv_1_1Stitcher.html#af9097e2b658dc1d3d57763c3fefd40aa)). Com isso, tentamos replicar o pipeline do OpenCV para podermos obter os parâmetros de transformação: utilizamos o feature detector ORB para extrair os keypoints das duas imagens adjacentes mascarando a região de interesse, depois utilizamos um knnMatcher para associar os keypoints entre as duas imagens. Associando-as, estimávamos a transfomração entre elas com 4 graus de liberdade (translação, rotação e escala). Os resultados não foram bons quando a diferença entre luminosidade era grande entre as imagens, já que o matching de keypoints associava regiões muito diferentes da imagem. Para melhorar essa solução, nós provavelmente iríamos pegar mais keypoints e aplicar um RANSAC (como [nesse artigo](https://towardsdatascience.com/image-panorama-stitching-with-opencv-2402bde6b46c)), mas não optamos por seguir esse caminho.
 
-Por fim, tentamos identificar as extremidades do grid de cada foto (o que tem as intersecções de 3 linhas e 3 colunas). Fizemos isso através de um threshholding binário para explicitar as linhas do grid, aplicamos a operação morfológica de dilatação para unir as 3 linhas delimitadoras do grid e depois aplicamos a operação de open para removeras linhas internas do grid. Por fim, usamos a função `skeletonize` da biblioteca imutils, aplicamos um floodfill no quadrado central e usamos a função `findContours` do OpenCV para encontrar as extremidades do quadrado.
 
-<img src="https://media.discordapp.net/attachments/691454909551214624/857343024299769866/pipeline.png?width=1440&height=640">
-
-Por fim, associamos os pontos encontrados em cada imagem com as imagens adjacentes (por exemplo, associando o ponto superior direito da imagem da esquerda com o ponto superior esquerdo da imagem da direita) através de uma transformação euclidiana (que só utiliza rotação e translação). Para descobrir as transformações finais de cada imagem, compusemos as transformações locais anteriores.
-Com isso, obtivemos um resultado satisfatório:
-
-<img src="https://media.discordapp.net/attachments/691454909551214624/857340404545749033/unknown.png?width=740&height=670">
-
-# Identificação e classificação de células de levedura
+## Identificação e classificação de células de levedura
 Para esta etapa, foram testados diversos modelos de detecção. Todos estes modelos buscavam evidenciar as céluas na imagem por meio da sua filtragem, canais de cores, thresholding, detecção de bordas etc. Os primeiros modelos, descartados ainda no início do projeto, exerciam as funções de identificar as células e classificá-las ao mesmo tempo por meio da segmentação da imagem por cores. Os modelos seguintes focaram na separação entre as etapas de detecção e classificação por meio da identificação de todas as células de forma indiscriminada seguida da classificação das mesmas por meio de um modelo <em>K-nearest-neighbors</em> treinado em um dos <em>datasets</em> disponibilizados. 
 
-## Primeiros experimentos
+### Primeiros experimentos
 Nestes modelos, as células vivas e mortas eram identificadas por meio de operações nos canais de cor da imagem seguidas de detecção de componentes conectadas para a identificação como pode ser visualizado na imagem a seguir. Na imagem, da esquerda para a direita, são mostradas as máscaras para a identificação das células mortas e vivas, respectivamente. Esta identificação foi realizada por meio da seleção das componentes conectadas que respeitavam um limiar (A) de área associado à área média das células, ou seja, apenas as componentes que possuíssem área maior que (A) foram reconhecidas como células. Este limiar foi definido de forma empírica.
 
 <img src="https://media.discordapp.net/attachments/691454909551214624/857355744215433266/first_method.png?width=710&height=701">
@@ -63,7 +97,7 @@ Apesar de identificar células separadas de forma satisfatória, o modelo peca q
 
 Isto acontece justamente pela técnica utilizada utilizar apenas informações de cor RGB. Os modelos seguintes, então, buscaram trabalhar com outros tipos de informações tais como textura e bordas, assim como também objetivaram a separação das etapas de detecção e classificação.
 
-## Identificação de leveduras
+### Identificação de leveduras
 Os modelos a serem explicados utilizam uma metodologia diferente da anterior: ao invés de identificarem as células de cada classe separadamente, as células são identificadas em conjunto para que sejam submetidas, posteriormene, a um modelo de classificação.
 
 ### Primeiro Modelo de Identificação
@@ -106,11 +140,11 @@ Abaixo, é possível comparar os resultados da detecção de cada um dos modelos
 
 O Modelo 2 (imagem central) é o que, até o momento, apresenta o melhor resultado, sendo ele o que detecta corretamente o maior número de células na imagem. O modelo 3 (última imagem) tende a ignorar algumas células na borda da imagem enquanto o primeiro modelo (primeira imagem) tende a identificar conjuntos de células como se fossem uma única. 
 
-# Classificação de leveduras
+## Classificação de leveduras
 Para a classificação de leveduras, foi criado um dataset a partir da sequência 1 de imagens disponibilizadas para os times. O software utilizado para criar as anotações das classes foi o CVAT e as células anotadas com bounding boxes foram recortadas e organizadas em dois diretórios: um para as células vivas e outro para as células mortas. A partir deste dataset, foi treinado um modelo K-nearest-neighbours. Nele, cada célula é representada por um vetor de features e por um label. Duas características foram escolhidas para a criação destes vetores: (1) concatenação das ativações de filtros de gabor sobre as imagens de células para a extração de características topológicas e (2) histograma de cor de cada imagem de célula. O primeiro vetor de features testado foi criado a partir da concatenação de (1) e (2). O segundo foi criado a partir apenas do histograma de cores. Os resultados de cada classificação são mostrados respectivamente de forma prática a partir da imagem a seguir. As células mortas são marcadas em vermelho, enquanto as mortas em azul.
 
 <img src="https://media.discordapp.net/attachments/691454909551214624/857399650667724810/comparison_final.png?width=1440&height=519">
 
 Ambas as escolhas de features resultam em classificações satisfatórias, porém o modelo que se baseia apenas em features de cor tendem a classificar erroneamente como mortas mesmo algumas células vivas quando estas estão próximas a células mortas. Por este motivo, os próximos passos visam aprimorar o primeiro modelo, assim como também trabalhar na tolerância a resíduos nas imagens. 
 
-# Contagem das leveduras
+## Contagem das leveduras
