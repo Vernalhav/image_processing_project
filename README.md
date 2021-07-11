@@ -64,8 +64,21 @@ Embora seja possível perceber algumas descontinuidades nos quadrados mais dista
 
 
 ## Identificação das células
+Para identificar as células, o seguinte pipeline foi proposto: (1) conversão do espaço de cores de BGR para LAB; (2) soma dos canais LA em um único canal;  (3) aplicação do HoughCircles na imagem resultante e posterior remoção de círculos sobrepostos e demarcação dos mesmos na imagem original. O primeiro passo foi proposto por os canais L e A extraírem características importantes relacionadas à colocação da imagem e às bordas das células. A imagem resultante do passo 2 e as células identificadas nessa imagem são demonstradas nas imagens a seguir.
+
+<img src="https://media.discordapp.net/attachments/691454909551214624/857390542916419634/final.png?width=1440&height=519">
+
+Este modelo se mostrou pouco propício a problemas de superposição de células como pode ser observado a seguir.
+
+<img src="https://media.discordapp.net/attachments/691454909551214624/857390977874264074/super.png">
 
 ## Classificação e contagem das células
+Para a classificação de leveduras, foi criado um dataset a partir da sequência 1 de imagens disponibilizadas para os times. O software utilizado para criar as anotações das classes foi o CVAT e as células anotadas com bounding boxes foram recortadas e organizadas em dois diretórios: um para as células vivas e outro para as células mortas. A partir deste dataset foi treinado um modelo K-nearest-neighbours. Nele, cada célula é representada por um vetor de features e por um label. As features escolhidas para representarem as células foram as provenientes dos bins dos histogramas de cores das imagens do dataset. O resultado da classificação por este método é demonstrado na imagem a seguir.
+
+<img src="https://cdn.discordapp.com/attachments/691454909551214624/863655390779670558/unknown.png">
+
+Por fim, é durante a classificação das células que a contagem acontece. O número de células vivas e mortas, assim como suas respectivas porcentagens são mostrados ao fim do processamento da imagem de entrada.
+
 
 # Outras tentativas ao longo do desenvolvimento
 
@@ -87,7 +100,7 @@ Como o stitching 2 a 2 do OpenCV estava funcionando bem, tentamos extrair os par
 
 
 ## Identificação e classificação de células de levedura
-Para esta etapa, foram testados diversos modelos de detecção. Todos estes modelos buscavam evidenciar as céluas na imagem por meio da sua filtragem, canais de cores, thresholding, detecção de bordas etc. Os primeiros modelos, descartados ainda no início do projeto, exerciam as funções de identificar as células e classificá-las ao mesmo tempo por meio da segmentação da imagem por cores. Os modelos seguintes focaram na separação entre as etapas de detecção e classificação por meio da identificação de todas as células de forma indiscriminada seguida da classificação das mesmas por meio de um modelo <em>K-nearest-neighbors</em> treinado em um dos <em>datasets</em> disponibilizados. 
+Para esta etapa, foram testados diversos modelos de detecção. Todos estes modelos buscavam evidenciar as céluas na imagem por meio da sua filtragem, canais de cores, thresholding, detecção de bordas etc. Os primeiros modelos, descartados ainda no início do projeto, exerciam as funções de identificar as células e classificá-las ao mesmo tempo por meio da segmentação da imagem por cores. Os modelos seguintes focaram na separação entre as etapas de detecção e classificação por meio da identificação de todas as células de forma indiscriminada seguida da classificação das mesmas por meio de modelos de classificação treinados em um dos <em>datasets</em> disponibilizados. 
 
 ### Primeiros experimentos
 Nestes modelos, as células vivas e mortas eram identificadas por meio de operações nos canais de cor da imagem seguidas de detecção de componentes conectadas para a identificação como pode ser visualizado na imagem a seguir. Na imagem, da esquerda para a direita, são mostradas as máscaras para a identificação das células mortas e vivas, respectivamente. Esta identificação foi realizada por meio da seleção das componentes conectadas que respeitavam um limiar (A) de área associado à área média das células, ou seja, apenas as componentes que possuíssem área maior que (A) foram reconhecidas como células. Este limiar foi definido de forma empírica.
@@ -116,38 +129,34 @@ O resultado destas etapas (última imagem mostrada acima) é submetido ao algori
 
 <img src="https://media.discordapp.net/attachments/766087042199191562/857375456176635914/cccccc.png">
 
-Após este pré-processamento, a imagem resultante (última imagem mostrada acima) é submetida ao algoritmo HoughCircles, o qual tem a finalidade de encontrar os padrões circulares das células e retornas as suas respectivas coordenadas. Os círculos encontrados são pré-processados para evitar superposições e a imagem final é demarcada com os mesmos.
+Após este pré-processamento, a imagem resultante (última imagem mostrada acima) é submetida ao algoritmo HoughCircles, o qual tem a finalidade de encontrar os padrões circulares das células e retornas as suas respectivas coordenadas. Os círculos encontrados são pré-processados para evitar superposições e a imagem final é demarcada com os círculos. As imagens abaixo apresentam, respectivamente, as demarcações antes e após o pré-processamento dos círculos encontrados.
 
 <img src="https://media.discordapp.net/attachments/691454909551214624/857378260681883678/final.png">
 
-Como pode ser observado na imagem a seguir, este modelo é menos propício a problemas na superposição de células.
+Como pode ser observado na imagem a seguir, este modelo é menos propício a problemas na superposição de células se comparado ao modelo mostrado anteriormente.
 
 <img src="https://media.discordapp.net/attachments/691454909551214624/857381039999811594/trash.png">
 
-O seu maior problema, porém, é o tempo levado para realizar a detecção. Por este motivo, o seguinte modelo está sendo desenvolvido.
+O seu maior problema, porém, é o tempo levado para realizar a detecção. Por este motivo, este modelo fora descartado.
 
 
-### Segundo Modelo de Identificação
-
-Em busca de simplificar o modelo anterior e de torná-lo mais rápido, o seguinte pipeline foi proposto e está sendo testado: (1) conversão do espaço de cores de BGR para LAB; (2) soma dos canais LA em um único canal;  (3) aplicação do HoughCircles na imagem resultante e posterior remoção de círculos sobrepostos e demarcação dos mesmos na imagem original. O primeiro passo foi proposto por os canais L e A extraem características importantes relacionadas à colocação da imagem e às bordas das células. A imagem resultante do passo 2 e as células identificadas nessa imagem são demonstradas nas imagens a seguir.
-
-<img src="https://media.discordapp.net/attachments/691454909551214624/857390542916419634/final.png?width=1440&height=519">
-
-Este modelo, assim como o seu antecessor, é pouco propício ao problema de superposição de células como pode ser observado a seguir.
-
-<img src="https://media.discordapp.net/attachments/691454909551214624/857390977874264074/super.png">
-
-Abaixo, é possível comparar os resultados da detecção de cada um dos modelos anteriores para a mesma imagem.
+Abaixo, é possível comparar os resultados, para a mesma imagem, da detecção de cada um dos modelos criados, sendo o terceiro modelo o utilizado neste projeto e detalhado na seção de metodologia.
 
 <img src="https://media.discordapp.net/attachments/691454909551214624/857395306627203112/comparison.png?width=1440&height=347">
 
-O Modelo 2 (imagem central) é o que, até o momento, apresenta o melhor resultado, sendo ele o que detecta corretamente o maior número de células na imagem. O modelo 3 (última imagem) tende a ignorar algumas células na borda da imagem enquanto o primeiro modelo (primeira imagem) tende a identificar conjuntos de células como se fossem uma única. 
+O modelo da primeira imagem tende a identificar conjuntos de células como se fossem uma única e, por este motivo, foi descartado. Já o modelo apresentado na imagem central é o que apresentou o melhor resultado, sendo ele o que detecta corretamente o maior número de células na imagem. Porém este modelo é o mais ineficiente em termos de tempo e custo computacional e por este motivo ele foi descartado. Por fim, o modelo apresentado na última imagem, o qual foi escolhido para ser o modelo utilizado no projeto, tende a ignorar algumas células na borda da imagem, problema que pode ser resolvido, em boa parte, quando as imagens são unidas em grid. 
 
-## Classificação de leveduras
-Para a classificação de leveduras, foi criado um dataset a partir da sequência 1 de imagens disponibilizadas para os times. O software utilizado para criar as anotações das classes foi o CVAT e as células anotadas com bounding boxes foram recortadas e organizadas em dois diretórios: um para as células vivas e outro para as células mortas. A partir deste dataset, foi treinado um modelo K-nearest-neighbours. Nele, cada célula é representada por um vetor de features e por um label. Duas características foram escolhidas para a criação destes vetores: (1) concatenação das ativações de filtros de gabor sobre as imagens de células para a extração de características topológicas e (2) histograma de cor de cada imagem de célula. O primeiro vetor de features testado foi criado a partir da concatenação de (1) e (2). O segundo foi criado a partir apenas do histograma de cores. Os resultados de cada classificação são mostrados respectivamente de forma prática a partir da imagem a seguir. As células mortas são marcadas em vermelho, enquanto as mortas em azul.
+## Classificação
+Três características foram escolhidas para a criação destes vetores: (1) concatenação das ativações de filtros de gabor sobre as imagens de células para a extração de características topológicas, (2) histograma de cor de cada imagem de célula e (3) extração de características por meio do algoritmo Haralick. O primeiro vetor de features testado foi criado a partir da concatenação de (1) e (2), o segundo tomando-se apenas (2) e o terceiro concatenando-se (2) e (3). A tabela a seguir mostra os resultados para alguns modelos treinados. A métrica utilizada para comparar os modelos no dataset de teste foi a F1 score para cada classe devido à natureza desbalanceada do dataset.
 
-<img src="https://media.discordapp.net/attachments/691454909551214624/857399650667724810/comparison_final.png?width=1440&height=519">
 
-Ambas as escolhas de features resultam em classificações satisfatórias, porém o modelo que se baseia apenas em features de cor tendem a classificar erroneamente como mortas mesmo algumas células vivas quando estas estão próximas a células mortas. Por este motivo, os próximos passos visam aprimorar o primeiro modelo, assim como também trabalhar na tolerância a resíduos nas imagens. 
+| Modelo/features | F1 (mortas) | F1 (vivas) |
+|-----------------|-------------|------------|
+| Knn/(2)         | 0.83        | 0.97       |
+| Knn/(1) e (2)   | 0.83        | 0.97       |
+| Knn/(2) e (3)   | 0.76        | 0.95       |
+| SVM/(2)         | 0.83        | 0.97       |
+| SVM/(1) e (2)   | 0.83        | 0.97       |
+| SVM/(2) e (3)   | 0.83        | 0.97       |
 
-## Contagem das leveduras
+Como pode ser observado, os classificadores apresentaram resultados semelhantes e isto se deu devido ao tamanho do dataset de testes (41 imagens para teste), o que limita o poder de generalização dos modelos. Sendo assim, por sua simplicidade, o modelo escolhido foi o KNN baseado em features de cor (Knn/(2)). 
