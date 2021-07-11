@@ -13,6 +13,8 @@ A especificação completa do desafio está disponível [aqui](https://www.notio
 `dataset_creator.ipynb`: Responsável por extrair as features das imagens do dataset de classificação e criar o dataset.
 `detect_and_classify.ipynb`: Responsável por receber a imagem do grid, detectar, classificar e contar as células mortas e vivas.  
 
+**OBS:** utilizamos um Drive compartilhado para armazenar as imagens de entrada, assim como os datasets auxiliares que criamos para classificação. Como montamos o Drive no Colab, não será possível rodar os exemplos sem ter acesso a essa pasta. Mesmo assim, os arquivos `stitcher` e `detect_and_classify` já estão com os exemplos pré-executados, então é possível ver a saída produzida (não geramos exemplos para o `dataset_creator` porque ele só criaa o dataset de classificação).
+
 # Imagens
 As imagens serão tiradas do dataset providenciado pela Visio e são no formato RGB com resolução 4k.
 Elas estão organizadas em grupos de 25, correspondendo ao grid 5x5 dentro da câmara. As regiões comuns podem ter diferentes iluminações e rotações entre as imagens. 
