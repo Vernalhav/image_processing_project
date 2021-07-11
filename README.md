@@ -77,7 +77,13 @@ Para a classificação de leveduras, foi criado um dataset a partir da sequênci
 
 <img src="https://cdn.discordapp.com/attachments/691454909551214624/863655390779670558/unknown.png">
 
-Por fim, é durante a classificação das células que a contagem acontece. O número de células vivas e mortas, assim como suas respectivas porcentagens são mostrados ao fim do processamento da imagem de entrada.
+Por fim, é durante a classificação das células que a contagem acontece. O número de células vivas e mortas, assim como suas respectivas porcentagens são mostrados ao fim do processamento da imagem de entrada. Um exemplo da saída produzida é ilustrado abaixo:
+```cs
+Número total de células: 971
+Número total de células mortas: 844 (86.92%)
+Número total de células vivas: 127 (13.08%)
+```
+
 
 
 # Outras tentativas ao longo do desenvolvimento
@@ -147,7 +153,7 @@ Abaixo, é possível comparar os resultados, para a mesma imagem, da detecção 
 O modelo da primeira imagem tende a identificar conjuntos de células como se fossem uma única e, por este motivo, foi descartado. Já o modelo apresentado na imagem central é o que apresentou o melhor resultado, sendo ele o que detecta corretamente o maior número de células na imagem. Porém este modelo é o mais ineficiente em termos de tempo e custo computacional e por este motivo ele foi descartado. Por fim, o modelo apresentado na última imagem, o qual foi escolhido para ser o modelo utilizado no projeto, tende a ignorar algumas células na borda da imagem, problema que pode ser resolvido, em boa parte, quando as imagens são unidas em grid. 
 
 ## Classificação
-Três características foram escolhidas para a criação destes vetores: (1) concatenação das ativações de filtros de gabor sobre as imagens de células para a extração de características topológicas, (2) histograma de cor de cada imagem de célula e (3) extração de características por meio do algoritmo Haralick. O primeiro vetor de features testado foi criado a partir da concatenação de (1) e (2), o segundo tomando-se apenas (2) e o terceiro concatenando-se (2) e (3). A tabela a seguir mostra os resultados para alguns modelos treinados. A métrica utilizada para comparar os modelos no dataset de teste foi a F1 score para cada classe devido à natureza desbalanceada do dataset.
+Três características foram escolhidas para a criação destes vetores: (1) concatenação das ativações de filtros de gabor sobre as imagens de células para a extração de características topológicas, (2) histograma de cor de cada imagem de célula e (3) extração de descritores Haralick. O primeiro vetor de features testado foi criado a partir da concatenação de (1) e (2), o segundo tomando-se apenas (2) e o terceiro concatenando-se (2) e (3). A tabela a seguir mostra os resultados para alguns modelos treinados. A métrica utilizada para comparar os modelos no dataset de teste foi a F1 score para cada classe devido à natureza desbalanceada do dataset.
 
 
 | Modelo/features | F1 (mortas) | F1 (vivas) |
