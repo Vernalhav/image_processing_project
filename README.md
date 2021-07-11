@@ -1,9 +1,3 @@
-# Desafio Visio  
-Marcelo Isaias de Moraes Junior  
-João Pedro Almeida Santos Secundino  
-João Vitor Silva Ramos  
-Victor Giovannoni Vernalha  
-
 # Objetivo  
 O objetivo desse projeto é unir as fotos tiradas de uma câmara de Neubauer contendo leveduras vivas e mortas e realizar a contagem de células em ambas as categorias.
 A especificação completa do desafio está disponível [aqui](https://www.notion.so/Proposta-de-Projeto-336e8afb603447109116a61d147c0e09).
@@ -123,7 +117,7 @@ Isto acontece justamente pela técnica utilizada utilizar apenas informações d
 Os modelos a serem explicados utilizam uma metodologia diferente da anterior: ao invés de identificarem as células de cada classe separadamente, as células são identificadas em conjunto para que sejam submetidas, posteriormene, a um modelo de classificação.
 
 ### Primeiro Modelo de Identificação
-O primeiro modelo realiza um pré-processamento para a remoção do canal vermelho e para o aumento do contraste da imagem. Em seguida é realizada a filtragem da imagem por 16 filtros de gabor (mostrados abaixo) e soma as melhores ativações é utilizada como máscara.
+O primeiro modelo realiza um pré-processamento para a remoção do canal vermelho e para o aumento do contraste da imagem. Em seguida é realizada a filtragem da imagem por 16 filtros de gabor (mostrados abaixo) e a soma das melhores ativações é utilizada como máscara.
 
 <img src="https://media.discordapp.net/attachments/766087042199191562/857368984486936576/gabor_results.png?width=1006&height=701">
 
@@ -166,3 +160,10 @@ Três características foram escolhidas para a criação destes vetores: (1) con
 | SVM/(2) e (3)   | 0.83        | 0.97       |
 
 Como pode ser observado, os classificadores apresentaram resultados semelhantes e isto se deu devido ao tamanho do dataset de testes (41 imagens para teste), o que limita o poder de generalização dos modelos. Sendo assim, por sua simplicidade, o modelo escolhido foi o KNN baseado em features de cor (Knn/(2)). 
+
+
+# Contribuições
+Marcelo Isaias de Moraes Junior: pesquisa e testes do stitcher, criação do dataset de células;  
+João Pedro Almeida Santos Secundino: identificação e classificação de células;  
+João Vitor Silva Ramos: pesquisa do stitcher, testes com a API Java;  
+Victor Giovannoni Vernalha: pesquisa e implementação do stitcher.
