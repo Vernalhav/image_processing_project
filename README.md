@@ -58,6 +58,7 @@ Ou seja, computamos a transformação global à esquerda e acima, e decidimos a 
 ### Sobreposição das imagens
 Calculadas as transformações globais, criamos uma imagem vazia de tamanho `5n x 5m` e usamos a função `warpAffine` do OpenCV com a transformação global de cada imagem.
 Embora seja possível perceber algumas descontinuidades nos quadrados mais distantes do grid, estamos satisfeitos com o resultado:
+
 <img src="https://media.discordapp.net/attachments/439158826483056660/863551234127822868/unknown.png?width=740&height=670">
 <img src="https://media.discordapp.net/attachments/439158826483056660/863550605091930112/unknown.png?width=740&height=670">
 
